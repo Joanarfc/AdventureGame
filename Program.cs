@@ -1,17 +1,18 @@
-﻿
-namespace PasswordChecker
+﻿using System.Text.RegularExpressions;
+
+namespace AdventureGame
 {
     class Program
     {
         public static void Main(string[] args)
         {
-            Console.Write("What is your name?: ");
-            string? name = Console.ReadLine();
+            string name = GetUserInput("What is your name? ");
+
             Console.WriteLine($"Hello, {name}! Welcome to our story.");
 
             Console.WriteLine("It begins on a cold rainy night. You're sitting in your room and hear a noise coming from down the hall. Do you go investigate?");
-            Console.WriteLine("Type YES or NO: ");
-            string? noiseChoice = GetUserInput().ToUpper();
+
+            string? noiseChoice = GetValidChoice($"Type YES or NO: ", "YES", "NO");
 
             if (noiseChoice == "NO")
             {
@@ -23,8 +24,7 @@ namespace PasswordChecker
                 Console.WriteLine("You walk into the hallway and see a light coming from under a door down the hall.");
                 Console.WriteLine("You walk towards it. Do you open it or knock?");
 
-                Console.WriteLine("Type OPEN or KNOCK: ");
-                string? doorChoice = Console.ReadLine()?.ToUpper();
+                string? doorChoice = GetValidChoice("Type OPEN or KNOCK: ", "OPEN", "KNOCK");
 
                 if (doorChoice == "KNOCK")
                 {
@@ -34,26 +34,66 @@ namespace PasswordChecker
                 {
                     ManageOpen();
                 }
-
             }
         }
-        static string GetUserInput()
-        {
-            string? userInput = Console.ReadLine()?.ToUpper().Trim();
 
-            while (string.IsNullOrEmpty(userInput))
+        static string GetUserInput(string prompt)
+        {
+            Console.Write(prompt);
+            string? userInput = Console.ReadLine()?.Trim();
+
+            // Validate input
+            while (string.IsNullOrEmpty(userInput) || !IsAlphabetic(userInput))
             {
-                Console.WriteLine("Invalid input. Please try again.");
-                userInput = Console.ReadLine()?.ToUpper().Trim();
+                Console.Write($"Invalid input. Please enter alphabetic characters only.\n{prompt}");
+                userInput = Console.ReadLine()?.Trim();
             }
+
             return userInput;
+        }
+        static string GetValidChoice(string prompt, string option1, string option2)
+        {
+            Console.Write(prompt);
+
+            while (true)
+            {
+                string? choice = Console.ReadLine()?.ToUpper()?.Trim();
+
+                if (!string.IsNullOrEmpty(choice) && (choice == option1 || choice == option2))
+                {
+                    return choice;
+                }
+
+                Console.Write("Invalid choice. Please enter either " + option1 + " or " + option2 + ": ");
+            }
+        }
+
+        static string GetValidChoice(string prompt, params string[] validOptions)
+        {
+            Console.Write(prompt);
+
+            while (true)
+            {
+                string? choice = Console.ReadLine()?.Trim();
+
+                if (!string.IsNullOrEmpty(choice) && validOptions.Contains(choice))
+                {
+                    return choice;
+                }
+
+                Console.Write("Invalid choice. Please enter a number between 1-3: ");
+            }
+        }
+
+        static bool IsAlphabetic(string input)
+        {
+            return Regex.IsMatch(input, @"^[a-zA-Z ]+$");
         }
         static void ManageKnock()
         {
             Console.WriteLine("A voice behind the door speaks. It says, \"Answer this riddle: \"");
             Console.WriteLine("\"Poor people have it. Rich people need it. If you eat it you die. What is it?\"");
-            Console.WriteLine("Type your answer: ");
-            string riddleAnswer = GetUserInput();
+            string? riddleAnswer = GetUserInput("Type your answer:");
 
             if (riddleAnswer == "NOTHING")
             {
@@ -70,8 +110,7 @@ namespace PasswordChecker
         static void ManageOpen()
         {
             Console.WriteLine("The door is locked! See if one of your three keys will open it.");
-            Console.WriteLine("Enter a number(1-3): ");
-            string keyChoice = GetUserInput();
+            string keyChoice = GetValidChoice("Enter a number (1-3): ", "1", "2", "3");
 
             switch (keyChoice)
             {
@@ -94,4 +133,5 @@ namespace PasswordChecker
             }
         }
     }
+
 }
